@@ -9,8 +9,8 @@
     <style>
         body {
             margin: 0;
-            font-family: Arial, sans-serif;
-            background: #000;
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #000, #111);
             color: #fff;
             display: flex;
         }
@@ -22,10 +22,11 @@
             padding: 20px;
             border-right: 1px solid #222;
             position: fixed;
+            background: #000;
         }
 
         .logo {
-            font-size: 22px;
+            font-size: 24px;
             font-weight: bold;
             margin-bottom: 30px;
         }
@@ -37,10 +38,12 @@
             color: #fff;
             text-decoration: none;
             border-radius: 10px;
+            transition: 0.3s;
         }
 
         .nav a:hover {
-            background: #121212;
+            background: #1a1a1a;
+            transform: translateX(5px);
         }
 
         /* MAIN */
@@ -48,7 +51,7 @@
             margin-left: 250px;
             padding: 30px;
             width: 100%;
-            max-width: 700px;
+            max-width: 750px;
         }
 
         h2 {
@@ -56,16 +59,18 @@
         }
 
         .card {
-            background: #111;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
             padding: 20px;
             border-radius: 15px;
             margin-top: 20px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.4);
         }
 
         input, textarea {
             width: 100%;
             margin: 10px 0;
-            padding: 10px;
+            padding: 12px;
             border-radius: 8px;
             border: none;
             background: #222;
@@ -74,22 +79,27 @@
 
         button {
             width: 100%;
-            padding: 10px;
-            background: #3897f0;
+            padding: 12px;
+            background: linear-gradient(45deg, #3897f0, #4aa3ff);
             border: none;
             color: #fff;
             border-radius: 8px;
             cursor: pointer;
+            transition: 0.3s;
         }
 
         button:hover {
-            background: #4aa3ff;
+            transform: scale(1.03);
         }
 
         .preview {
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
+        }
+
+        .preview-box {
+            position: relative;
         }
 
         .preview img,
@@ -100,9 +110,32 @@
             border-radius: 8px;
         }
 
+        .remove-btn {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: red;
+            border-radius: 50%;
+            color: #fff;
+            font-size: 12px;
+            width: 20px;
+            height: 20px;
+            text-align: center;
+            cursor: pointer;
+        }
+
         hr {
             margin: 30px 0;
             border: 1px solid #222;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+            .container {
+                margin-left: 0;
+            }
         }
     </style>
 </head>
@@ -124,14 +157,12 @@
     <div class="container">
         <h2>Create</h2>
 
-        <!-- ================= POST FORM ================= -->
+        <!-- POST -->
         <div class="card">
             <h3>Upload Post 📸</h3>
 
             <form action="/create-post" method="post" enctype="multipart/form-data">
-
                 <input type="file" name="userPost" id="postInput" multiple accept="image/*">
-
                 <textarea name="caption" placeholder="Write caption..."></textarea>
 
                 <div class="preview" id="postPreview"></div>
@@ -142,14 +173,12 @@
 
         <hr>
 
-        <!-- ================= REEL FORM ================= -->
+        <!-- REEL -->
         <div class="card">
             <h3>Upload Reel 🎥</h3>
 
             <form action="/create-reel" method="post" enctype="multipart/form-data">
-
                 <input type="file" name="userReel" id="reelInput" multiple accept="video/*">
-
                 <textarea name="caption" placeholder="Write caption..."></textarea>
 
                 <div class="preview" id="reelPreview"></div>
@@ -157,35 +186,58 @@
                 <button type="submit">Upload Reel</button>
             </form>
         </div>
-
     </div>
 
-    <!-- JS PREVIEW -->
+    <!-- JS -->
     <script>
-        // POST preview
-        document.getElementById("postInput").addEventListener("change", function (e) {
-            const preview = document.getElementById("postPreview");
-            preview.innerHTML = "";
+        function previewFiles(inputId, previewId, type) {
+            const input = document.getElementById(inputId);
+            const preview = document.getElementById(previewId);
 
-            Array.from(e.target.files).forEach(file => {
-                const img = document.createElement("img");
-                img.src = URL.createObjectURL(file);
-                preview.appendChild(img);
+            input.addEventListener("change", function (e) {
+                preview.innerHTML = "";
+
+                Array.from(e.target.files).forEach((file, index) => {
+
+                    // validation
+                    if (type === "image" && !file.type.startsWith("image/")) {
+                        alert("Only images allowed!");
+                        return;
+                    }
+
+                    if (type === "video" && !file.type.startsWith("video/")) {
+                        alert("Only videos allowed!");
+                        return;
+                    }
+
+                    const box = document.createElement("div");
+                    box.classList.add("preview-box");
+
+                    let element;
+                    if (type === "image") {
+                        element = document.createElement("img");
+                    } else {
+                        element = document.createElement("video");
+                        element.controls = true;
+                    }
+
+                    element.src = URL.createObjectURL(file);
+
+                    const remove = document.createElement("div");
+                    remove.innerText = "×";
+                    remove.classList.add("remove-btn");
+
+                    remove.onclick = () => box.remove();
+
+                    box.appendChild(element);
+                    box.appendChild(remove);
+                    preview.appendChild(box);
+                });
             });
-        });
+        }
 
-        // REEL preview
-        document.getElementById("reelInput").addEventListener("change", function (e) {
-            const preview = document.getElementById("reelPreview");
-            preview.innerHTML = "";
-
-            Array.from(e.target.files).forEach(file => {
-                const video = document.createElement("video");
-                video.src = URL.createObjectURL(file);
-                video.controls = true;
-                preview.appendChild(video);
-            });
-        });
+        previewFiles("postInput", "postPreview", "image");
+        previewFiles("reelInput", "reelPreview", "video");
     </script>
 
 </body>

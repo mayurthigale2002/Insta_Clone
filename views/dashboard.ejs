@@ -10,13 +10,13 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: Arial
+            font-family: 'Segoe UI', sans-serif;
         }
 
         body {
             background: #000;
             color: #fff;
-            display: flex
+            display: flex;
         }
 
         /* SIDEBAR */
@@ -25,13 +25,14 @@
             height: 100vh;
             padding: 20px;
             border-right: 1px solid #222;
-            position: fixed
+            position: fixed;
+            background: #000;
         }
 
         .logo {
-            font-size: 22px;
+            font-size: 24px;
             font-weight: bold;
-            margin-bottom: 30px
+            margin-bottom: 30px;
         }
 
         .nav a {
@@ -41,18 +42,21 @@
             margin: 6px 0;
             color: #fff;
             text-decoration: none;
-            border-radius: 10px
+            border-radius: 10px;
+            transition: 0.3s;
         }
 
         .nav a:hover {
-            background: #121212
+            background: #1a1a1a;
+            transform: translateX(5px);
         }
 
         /* MAIN */
         .main {
             margin-left: 260px;
-            width: 500px;
-            padding: 20px
+            width: 100%;
+            max-width: 600px;
+            padding: 20px;
         }
 
         /* STORIES */
@@ -61,55 +65,95 @@
             gap: 15px;
             padding: 15px;
             border: 1px solid #222;
-            border-radius: 10px;
-            margin-bottom: 20px
+            border-radius: 12px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+        }
+
+        .story {
+            text-align: center;
+        }
+
+        .story img {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 2px solid #3897f0;
+            padding: 2px;
+        }
+
+        .story p {
+            font-size: 12px;
+            margin-top: 5px;
         }
 
         /* POST */
         .post {
             border: 1px solid #222;
-            border-radius: 10px;
-            margin-bottom: 20px
+            border-radius: 12px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            background: #111;
+            transition: 0.3s;
+        }
+
+        .post:hover {
+            box-shadow: 0 0 15px rgba(255,255,255,0.1);
         }
 
         .post-header {
             display: flex;
             align-items: center;
-            padding: 10px
+            padding: 10px;
         }
 
         .profile-pic {
-            width: 32px;
-            height: 32px;
+            width: 35px;
+            height: 35px;
             border-radius: 50%;
-            overflow: hidden
+            overflow: hidden;
         }
 
         .profile-pic img {
             width: 100%;
-            height: 100%
+            height: 100%;
         }
 
         .post-user {
             margin-left: 10px;
-            font-weight: bold
+            font-weight: bold;
         }
 
         .post-img img,
         .post-img video {
             width: 100%;
-            height: 400px;
-            object-fit: cover
+            max-height: 400px;
+            object-fit: cover;
         }
 
         .caption {
-            padding: 10px
+            padding: 12px;
+            font-size: 14px;
+        }
+
+        .caption b {
+            margin-right: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+            .main {
+                margin-left: 0;
+            }
         }
     </style>
 </head>
 
 <body>
 
+    <!-- SIDEBAR -->
     <div class="sidebar">
         <div class="logo">Instagram</div>
         <div class="nav">
@@ -120,15 +164,14 @@
         </div>
     </div>
 
+    <!-- MAIN -->
     <div class="main">
 
         <!-- STORIES -->
         <div class="stories">
-            <div>
-                <img src="/upload/<%= userData?.userProfile || 'default.png' %>" width="50" style="border-radius:50%">
-                <p>
-                    <%= user?.userName %>
-                </p>
+            <div class="story">
+                <img src="/upload/<%= userData?.userProfile || 'default.png' %>">
+                <p><%= user?.userName %></p>
             </div>
         </div>
 
@@ -153,54 +196,51 @@
                     </div>
 
                     <div class="caption">
-                        <b>
-                            <%= user.userName %>
-                        </b>
+                        <b><%= user.userName %></b>
                         <%= post.caption %>
                     </div>
 
                 </div>
 
-                <% }) %>
+            <% }) %>
 
-                    <% } %>
+        <% } %>
 
-                        <!-- REELS -->
-                        <% if(userData && userData.userReel && userData.userReel.length> 0){ %>
+        <!-- REELS -->
+        <% if(userData && userData.userReel && userData.userReel.length> 0){ %>
 
-                            <% userData.userReel.slice().reverse().forEach(reel=> { %>
+            <% userData.userReel.slice().reverse().forEach(reel=> { %>
 
-                                <div class="post">
+                <div class="post">
 
-                                    <div class="post-header">
-                                        <div class="profile-pic">
-                                            <img src="/upload/<%= userData?.userProfile || 'default.png' %>">
-                                        </div>
-                                        <div class="post-user">
-                                            <%= user.userName %>
-                                        </div>
-                                    </div>
+                    <div class="post-header">
+                        <div class="profile-pic">
+                            <img src="/upload/<%= userData?.userProfile || 'default.png' %>">
+                        </div>
+                        <div class="post-user">
+                            <%= user.userName %>
+                        </div>
+                    </div>
 
-                                    <div class="post-img">
-                                        <video controls>
-                                            <source src="/upload/<%= reel.video %>">
-                                        </video>
-                                    </div>
+                    <div class="post-img">
+                        <video controls>
+                            <source src="/upload/<%= reel.video %>">
+                        </video>
+                    </div>
 
-                                    <div class="caption">
-                                        <b>
-                                            <%= user.userName %>
-                                        </b>
-                                        <%= reel.caption %>
-                                    </div>
+                    <div class="caption">
+                        <b><%= user.userName %></b>
+                        <%= reel.caption %>
+                    </div>
 
-                                </div>
+                </div>
 
-                                <% }) %>
+            <% }) %>
 
-                                    <% } %>
+        <% } %>
 
     </div>
+
 </body>
 
 </html>
