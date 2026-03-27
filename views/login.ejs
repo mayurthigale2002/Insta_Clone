@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dark Login</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',sans-serif; }
+
+    body {
+      height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      background: radial-gradient(circle at top, #1a1a1a, #0d0d0d, #000);
+    }
+
+    .container {
+      width:340px;
+      padding:40px;
+      border-radius:20px;
+      background:rgba(20,20,20,0.9);
+      backdrop-filter:blur(20px);
+      box-shadow:0 0 40px rgba(0,0,0,0.8);
+      text-align:center;
+      color:#fff;
+      animation: pop 0.7s ease;
+    }
+
+    @keyframes pop {
+      from { transform:scale(0.8); opacity:0; }
+      to { transform:scale(1); opacity:1; }
+    }
+
+    h1 { margin-bottom:25px; }
+
+    .input-box {
+      position:relative;
+      margin:20px 0;
+    }
+
+    .input-box input {
+      width:100%;
+      padding:12px;
+      border-radius:10px;
+      border:2px solid rgba(255,255,255,0.1);
+      background:#111;
+      color:#fff;
+      outline:none;
+      transition:0.3s;
+    }
+
+    .input-box input:focus {
+      border-color:#8134af;
+      box-shadow:0 0 12px rgba(129,52,175,0.6);
+      transform:scale(1.03);
+    }
+
+    .input-box label {
+      position:absolute;
+      left:12px;
+      top:50%;
+      transform:translateY(-50%);
+      color:rgba(255,255,255,0.5);
+      transition:0.3s;
+      pointer-events:none;
+    }
+
+    .input-box input:focus + label,
+    .input-box input:valid + label {
+      top:-8px;
+      font-size:12px;
+      background:#000;
+      padding:2px 6px;
+      border-radius:5px;
+    }
+
+    button {
+      width:100%;
+      padding:12px;
+      margin-top:10px;
+      border:none;
+      border-radius:10px;
+      background:linear-gradient(90deg,#8134af,#dd2a7b);
+      color:#fff;
+      font-weight:bold;
+      cursor:pointer;
+      transition:0.3s;
+    }
+
+    button:hover {
+      transform:scale(1.05);
+      box-shadow:0 0 20px rgba(221,42,123,0.6);
+    }
+
+    .footer {
+      margin-top:20px;
+      font-size:13px;
+      color:#aaa;
+    }
+
+    .footer a {
+      color:#fff;
+      text-decoration:none;
+      font-weight:bold;
+    }
+
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Welcome Back 🔥</h1>
+
+    <form action="/login" method="post">
+      <div class="input-box">
+        <input type="text" id="username" name="userName" required>
+        <label>Username</label>
+      </div>
+
+      <div class="input-box">
+        <input type="password" id="password" name="password" required>
+        <label>Password</label>
+      </div>
+
+      <button type="submit">Login</button>
+    </form>
+
+    <div class="footer">
+      Don't have an account? 
+      <a href="/signup">Sign Up</a>
+    </div>
+  </div>
+
+</body>
+</html>

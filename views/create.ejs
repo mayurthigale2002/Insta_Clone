@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Post & Reel</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #000;
+            color: #fff;
+            display: flex;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 230px;
+            height: 100vh;
+            padding: 20px;
+            border-right: 1px solid #222;
+            position: fixed;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
+
+        .nav a {
+            display: block;
+            padding: 12px;
+            margin: 6px 0;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 10px;
+        }
+
+        .nav a:hover {
+            background: #121212;
+        }
+
+        /* MAIN */
+        .container {
+            margin-left: 250px;
+            padding: 30px;
+            width: 100%;
+            max-width: 700px;
+        }
+
+        h2 {
+            text-align: center;
+        }
+
+        .card {
+            background: #111;
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+
+        input, textarea {
+            width: 100%;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 8px;
+            border: none;
+            background: #222;
+            color: #fff;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background: #3897f0;
+            border: none;
+            color: #fff;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #4aa3ff;
+        }
+
+        .preview {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .preview img,
+        .preview video {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        hr {
+            margin: 30px 0;
+            border: 1px solid #222;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <div class="logo">Instagram</div>
+
+        <div class="nav">
+            <a href="/dashboard">🏠 Home</a>
+            <a href="/profile">👤 Profile</a>
+            <a href="/logout">🚪 Logout</a>
+        </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="container">
+        <h2>Create</h2>
+
+        <!-- ================= POST FORM ================= -->
+        <div class="card">
+            <h3>Upload Post 📸</h3>
+
+            <form action="/create-post" method="post" enctype="multipart/form-data">
+
+                <input type="file" name="userPost" id="postInput" multiple accept="image/*">
+
+                <textarea name="caption" placeholder="Write caption..."></textarea>
+
+                <div class="preview" id="postPreview"></div>
+
+                <button type="submit">Upload Post</button>
+            </form>
+        </div>
+
+        <hr>
+
+        <!-- ================= REEL FORM ================= -->
+        <div class="card">
+            <h3>Upload Reel 🎥</h3>
+
+            <form action="/create-reel" method="post" enctype="multipart/form-data">
+
+                <input type="file" name="userReel" id="reelInput" multiple accept="video/*">
+
+                <textarea name="caption" placeholder="Write caption..."></textarea>
+
+                <div class="preview" id="reelPreview"></div>
+
+                <button type="submit">Upload Reel</button>
+            </form>
+        </div>
+
+    </div>
+
+    <!-- JS PREVIEW -->
+    <script>
+        // POST preview
+        document.getElementById("postInput").addEventListener("change", function (e) {
+            const preview = document.getElementById("postPreview");
+            preview.innerHTML = "";
+
+            Array.from(e.target.files).forEach(file => {
+                const img = document.createElement("img");
+                img.src = URL.createObjectURL(file);
+                preview.appendChild(img);
+            });
+        });
+
+        // REEL preview
+        document.getElementById("reelInput").addEventListener("change", function (e) {
+            const preview = document.getElementById("reelPreview");
+            preview.innerHTML = "";
+
+            Array.from(e.target.files).forEach(file => {
+                const video = document.createElement("video");
+                video.src = URL.createObjectURL(file);
+                video.controls = true;
+                preview.appendChild(video);
+            });
+        });
+    </script>
+
+</body>
+
+</html>

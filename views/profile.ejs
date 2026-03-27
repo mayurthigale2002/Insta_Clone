@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<title>Profile</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
+body{background:#000;color:#fff;display:flex}
+
+/* SIDEBAR */
+.sidebar{
+  width:230px;height:100vh;padding:20px;
+  border-right:1px solid #222;position:fixed
+}
+.logo{font-size:22px;font-weight:bold;margin-bottom:30px}
+.nav a{
+  display:flex;gap:12px;padding:12px;margin:6px 0;
+  color:#fff;text-decoration:none;border-radius:10px
+}
+.nav a:hover{background:#121212}
+
+/* MAIN */
+.container{
+  margin-left:250px;
+  max-width:900px;
+  padding:20px
+}
+
+/* HEADER */
+.profile-header{
+  display:flex;
+  gap:40px;
+  align-items:center;
+  margin-bottom:20px
+}
+
+.profile-pic{
+  width:120px;height:120px;border-radius:50%;
+  overflow:hidden
+}
+
+.profile-pic img{
+  width:100%;height:100%;object-fit:cover
+}
+
+.stats{display:flex;gap:20px;margin:10px 0}
+.bio{color:#aaa}
+
+.btn{
+  padding:8px 15px;
+  background:#3897f0;
+  border-radius:6px;
+  color:#fff;
+  text-decoration:none;
+  margin-right:10px;
+}
+
+/* GRID */
+.posts{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:5px
+}
+
+.post{
+  height:250px;
+  background:#222;
+  position:relative;
+  overflow:hidden;
+}
+
+/* MEDIA */
+.post img,
+.post video{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+/* DELETE BUTTON */
+.delete-btn{
+  position:absolute;
+  top:5px;
+  right:5px;
+  background:red;
+  color:white;
+  border:none;
+  padding:5px 8px;
+  border-radius:5px;
+  cursor:pointer;
+  z-index:10;
+  opacity:0;
+  transition:0.2s;
+}
+
+.post:hover .delete-btn{
+  opacity:1;
+}
+</style>
+</head>
+
+<body>
+
+<div class="sidebar">
+  <div class="logo">Instagram</div>
+  <div class="nav">
+    <a href="/dashboard">🏠 Home</a>
+    <a href="/create">➕ Create</a>
+    <a href="/profile">👤 Profile</a>
+    <a href="/logout">🚪 Logout</a>
+  </div>
+</div>
+
+<div class="container">
+
+<div class="profile-header">
+
+  <div class="profile-pic">
+    <img src="/upload/<%= profile?.userProfile || 'default.png' %>">
+  </div>
+
+  <div>
+    <h2><%= user.userName %></h2>
+
+    <div class="stats">
+      <div><b><%= profile?.userPost?.length || 0 %></b> posts</div>
+      <div><b>0</b> followers</div>
+      <div><b>0</b> following</div>
+    </div>
+
+    <div class="bio">
+      <%= profile?.userBio || "No bio added" %>
+    </div>
+
+    <a href="/edit-profile" class="btn">Edit</a>
+    <a href="/create" class="btn">➕ Add</a>
+  </div>
+
+</div>
+
+<!-- POSTS + REELS -->
+<div class="posts">
+
+<!-- POSTS -->
+<% if(profile && profile.userPost && profile.userPost.length){ %>
+  <% profile.userPost.forEach(post => { %>
+    <div class="post">
+
+      <button class="delete-btn"
+        onclick="deleteItem('/delete/post/<%= post._id %>')">X</button>
+
+      <img src="/upload/<%= post.image %>" alt="post">
+
+    </div>
+  <% }) %>
+<% } %>
+
+<!-- REELS -->
+<% if(profile && profile.userReel && profile.userReel.length){ %>
+  <% profile.userReel.forEach(reel => { %>
+    <div class="post">
+
+      <button class="delete-btn"
+        onclick="deleteItem('/delete/reel/<%= reel._id %>')">X</button>
+
+      <!-- FIXED VIDEO (CLICKABLE + CONTROLS WORKING) -->
+      <video controls>
+        <source src="/upload/<%= reel.video %>" type="video/mp4">
+      </video>
+
+    </div>
+  <% }) %>
+<% } %>
+
+</div>
+
+</div>
+
+<!-- DELETE CONFIRM -->
+<script>
+function deleteItem(url) {
+    if (confirm("Are you sure you want to delete?")) {
+        window.location.href = url;
+    }
+}
+</script>
+
+</body>
+</html>

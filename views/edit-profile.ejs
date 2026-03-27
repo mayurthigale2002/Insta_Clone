@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Edit Profile</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #000;
+    color: #fff;
+    display: flex;
+}
+
+/* SIDEBAR */
+.sidebar {
+    width: 230px;
+    height: 100vh;
+    padding: 20px;
+    border-right: 1px solid #222;
+    position: fixed;
+}
+
+.logo {
+    font-size: 22px;
+    font-weight: bold;
+    margin-bottom: 30px;
+}
+
+.nav a {
+    display: flex;
+    gap: 12px;
+    padding: 12px;
+    margin: 6px 0;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 10px;
+}
+
+.nav a:hover { background: #121212; }
+
+.logout:hover { color: #ed4956; }
+
+/* MAIN */
+.container {
+    margin-left: 250px;
+    flex: 1;
+    padding: 30px;
+    max-width: 600px;
+}
+
+h2 {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.card {
+    background: #111;
+    padding: 20px;
+    border-radius: 15px;
+}
+
+/* INPUTS */
+input, select {
+    display: block;
+    width: 100%;
+    margin: 10px 0;
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    background: #222;
+    color: #fff;
+}
+
+/* BUTTON */
+.submit-btn {
+    width: 100%;
+    padding: 12px;
+    background: #3897f0;
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    cursor: pointer;
+}
+
+/* IMAGE */
+#previewImg {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+    margin: 0 auto 10px;
+}
+
+.add-icon {
+    text-align: center;
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="sidebar">
+    <div class="logo">Instagram</div>
+    <div class="nav">
+        <a href="/dashboard">🏠 Home</a>
+        <a href="/messages">💬 Messages</a>
+        <a href="/profile">👤 Profile</a>
+        <a href="/logout" class="logout">🚪 Logout</a>
+    </div>
+</div>
+
+<div class="container">
+<h2>Edit Profile</h2>
+
+<div class="card">
+<form action="/profile" method="post" enctype="multipart/form-data">
+
+<!-- PROFILE IMAGE -->
+<label>Profile Picture</label>
+
+<img id="previewImg"
+src="/upload/<%= profile && profile.userProfile ? profile.userProfile : 'default.png' %>">
+
+<input type="file" name="userProfile" id="profileInput">
+
+<div class="add-icon" onclick="document.getElementById('profileInput').click()">
+    Change Photo
+</div>
+
+<!-- USERNAME -->
+<label>Username</label>
+<input type="text" name="username"
+value="<%= profile && profile.username ? profile.username : '' %>">
+
+<!-- BIO -->
+<label>Bio</label>
+<input type="text" name="userBio"
+value="<%= profile && profile.userBio ? profile.userBio : '' %>">
+
+<!-- GENDER -->
+<label>Gender</label>
+<select name="gender">
+    <option value="">Select Gender</option>
+
+    <option value="Male"
+    <%= profile && profile.gender === 'Male' ? 'selected' : '' %>>
+    Male
+    </option>
+
+    <option value="Female"
+    <%= profile && profile.gender === 'Female' ? 'selected' : '' %>>
+    Female
+    </option>
+
+</select>
+
+<button type="submit" class="submit-btn">Update Profile</button>
+
+</form>
+</div>
+</div>
+
+<script>
+document.getElementById('profileInput').onchange = function (e) {
+    const file = e.target.files[0];
+    if (file) {
+        document.getElementById('previewImg').src = URL.createObjectURL(file);
+    }
+};
+</script>
+
+</body>
+</html>

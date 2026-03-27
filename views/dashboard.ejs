@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Instagram Dashboard</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial
+        }
+
+        body {
+            background: #000;
+            color: #fff;
+            display: flex
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 240px;
+            height: 100vh;
+            padding: 20px;
+            border-right: 1px solid #222;
+            position: fixed
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 30px
+        }
+
+        .nav a {
+            display: flex;
+            gap: 15px;
+            padding: 12px;
+            margin: 6px 0;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 10px
+        }
+
+        .nav a:hover {
+            background: #121212
+        }
+
+        /* MAIN */
+        .main {
+            margin-left: 260px;
+            width: 500px;
+            padding: 20px
+        }
+
+        /* STORIES */
+        .stories {
+            display: flex;
+            gap: 15px;
+            padding: 15px;
+            border: 1px solid #222;
+            border-radius: 10px;
+            margin-bottom: 20px
+        }
+
+        /* POST */
+        .post {
+            border: 1px solid #222;
+            border-radius: 10px;
+            margin-bottom: 20px
+        }
+
+        .post-header {
+            display: flex;
+            align-items: center;
+            padding: 10px
+        }
+
+        .profile-pic {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            overflow: hidden
+        }
+
+        .profile-pic img {
+            width: 100%;
+            height: 100%
+        }
+
+        .post-user {
+            margin-left: 10px;
+            font-weight: bold
+        }
+
+        .post-img img,
+        .post-img video {
+            width: 100%;
+            height: 400px;
+            object-fit: cover
+        }
+
+        .caption {
+            padding: 10px
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="sidebar">
+        <div class="logo">Instagram</div>
+        <div class="nav">
+            <a href="/dashboard">🏠 Home</a>
+            <a href="/create">➕ Create</a>
+            <a href="/profile">👤 Profile</a>
+            <a href="/logout">🚪 Logout</a>
+        </div>
+    </div>
+
+    <div class="main">
+
+        <!-- STORIES -->
+        <div class="stories">
+            <div>
+                <img src="/upload/<%= userData?.userProfile || 'default.png' %>" width="50" style="border-radius:50%">
+                <p>
+                    <%= user?.userName %>
+                </p>
+            </div>
+        </div>
+
+        <!-- POSTS -->
+        <% if(userData && userData.userPost && userData.userPost.length> 0){ %>
+
+            <% userData.userPost.slice().reverse().forEach(post=> { %>
+
+                <div class="post">
+
+                    <div class="post-header">
+                        <div class="profile-pic">
+                            <img src="/upload/<%= userData?.userProfile || 'default.png' %>">
+                        </div>
+                        <div class="post-user">
+                            <%= user.userName %>
+                        </div>
+                    </div>
+
+                    <div class="post-img">
+                        <img src="/upload/<%= post.image %>">
+                    </div>
+
+                    <div class="caption">
+                        <b>
+                            <%= user.userName %>
+                        </b>
+                        <%= post.caption %>
+                    </div>
+
+                </div>
+
+                <% }) %>
+
+                    <% } %>
+
+                        <!-- REELS -->
+                        <% if(userData && userData.userReel && userData.userReel.length> 0){ %>
+
+                            <% userData.userReel.slice().reverse().forEach(reel=> { %>
+
+                                <div class="post">
+
+                                    <div class="post-header">
+                                        <div class="profile-pic">
+                                            <img src="/upload/<%= userData?.userProfile || 'default.png' %>">
+                                        </div>
+                                        <div class="post-user">
+                                            <%= user.userName %>
+                                        </div>
+                                    </div>
+
+                                    <div class="post-img">
+                                        <video controls>
+                                            <source src="/upload/<%= reel.video %>">
+                                        </video>
+                                    </div>
+
+                                    <div class="caption">
+                                        <b>
+                                            <%= user.userName %>
+                                        </b>
+                                        <%= reel.caption %>
+                                    </div>
+
+                                </div>
+
+                                <% }) %>
+
+                                    <% } %>
+
+    </div>
+</body>
+
+</html>
