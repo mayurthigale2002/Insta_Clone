@@ -4,73 +4,43 @@ const session = require('express-session');
 const multer = require('multer');
 const bcrypt = require('bcryptjs');
 const fs = require('fs');
-const path = require('path');
 
 const PORT = 3001;
 const HOST = '127.0.0.1';
 
-// ------------------ MIDDLEWARE ------------------
 app.use(express.static('public/'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Session config (Improved)
+
 app.use(session({
-    secret: "jagruti@1204",
     resave: false,
     saveUninitialized: false,
-    cookie: {
-        httpOnly: true,
-        maxAge: 1000 * 60 * 30 // 30 minutes
-    }
+    secret: "jagruti@1204"
 }));
 
-// ------------------ DB CONNECTION ------------------
+
 const connection = require('./config/db');
 connection();
 
-// ------------------ MODELS ------------------
+
 const instaSchema = require('./model/instaSchema');
 const userSchema = require('./model/userSchema');
 const sendGmail = require('./gmail');
 
-// ------------------ AUTH MIDDLEWARE ------------------
-const isAuth = (req, res, next) => {
-    if (!req.session.loginId) {
-        return res.redirect('/');
-    }
-    next();
-};
-
-// ------------------ MULTER CONFIG ------------------
 const storage = multer.diskStorage({
     destination: 'public/upload/',
     filename: (req, file, cb) => {
         cb(null, Date.now() + "_" + file.originalname);
     }
 });
+const upload = multer({ storage });
 
-const upload = multer({
-    storage,
-    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
-    fileFilter: (req, file, cb) => {
-        const allowed = ["image/jpeg", "image/png", "video/mp4"];
-        if (allowed.includes(file.mimetype)) {
-            cb(null, true);
-        } else {
-            cb(new Error("Invalid file type"));
-        }
-    }
-});
 
-// ------------------ ROUTES ------------------
-
-// Login Page
 app.get('/', (req, res) => {
     res.render('login.ejs');
 });
 
-// LOGIN
 app.post('/login', async (req, res) => {
     try {
         const { userName, password } = req.body;
@@ -87,64 +57,42 @@ app.post('/login', async (req, res) => {
 
     } catch (err) {
         console.log(err);
-        res.send("Something went wrong");
     }
 });
 
-// SIGNUP PAGE
+
 app.get('/signup', (req, res) => {
     res.render('signup.ejs');
 });
 
-// SIGNUP + OTP
-app.post('/signup', async (req, res) => {
-    try {
-        const { userName, userEmail, password, phone } = req.body;
+app.post('/signup', (req, res) => {
+    const { userName, userEmail, password, phone } = req.body;
 
-        if (!userName || !userEmail || !password || !phone) {
-            return res.send(`<script>alert('All fields required'); location.href='/signup'</script>`);
-        }
-
-        if (password.length < 6) {
-            return res.send(`<script>alert('Password must be 6+ characters'); location.href='/signup'</script>`);
-        }
-
-        const existingUser = await instaSchema.findOne({ userEmail });
-        if (existingUser) {
-            return res.send(`<script>alert('Email already exists'); location.href='/signup'</script>`);
-        }
-
-        req.session.userDetails = req.body;
-
-        const otp = Math.floor(1000 + Math.random() * 9000);
-        req.session.OTP = otp;
-        req.session.otpExpire = Date.now() + 5 * 60 * 1000; // 5 min
-
-        console.log("OTP:", otp);
-        sendGmail(userEmail, otp);
-
-        res.redirect('/otppage');
-
-    } catch (err) {
-        console.log(err);
-        res.send("Error during signup");
+    if (!userName || !userEmail || !password || !phone) {
+        return res.send(`<script>alert('All fields required'); location.href='/signup'</script>`);
     }
+
+    req.session.userDetails = req.body;
+
+    const otp = Math.floor(1000 + Math.random() * 9000);
+    req.session.OTP = otp;
+
+    console.log("OTP:", otp);
+    sendGmail(userEmail, otp);
+
+    res.redirect('/otppage');
 });
 
-// OTP PAGE
+
 app.get('/otppage', (req, res) => {
     res.render('otppage.ejs');
 });
 
-// VERIFY OTP
 app.post('/verifyotp', async (req, res) => {
     try {
+
         if (!req.session.userDetails) {
             return res.send(`<script>alert('Session expired'); location.href='/signup'</script>`);
-        }
-
-        if (Date.now() > req.session.otpExpire) {
-            return res.send(`<script>alert('OTP Expired'); location.href='/signup'</script>`);
         }
 
         const userOtp = req.body.userotp.join('');
@@ -170,18 +118,24 @@ app.post('/verifyotp', async (req, res) => {
 
     } catch (err) {
         console.log(err);
-        res.send("OTP verification failed");
     }
 });
 
-// DASHBOARD
-app.get('/dashboard', isAuth, async (req, res) => {
+
+app.get('/dashboard', async (req, res) => {
     try {
+
+        if (!req.session.loginId) return res.redirect('/');
+
         const user = await instaSchema.findById(req.session.loginId);
 
-        let userData = await userSchema.findOne({ userId: req.session.loginId });
+        let userData = await userSchema.findOne({
+            userId: req.session.loginId
+        });
 
-        if (!userData) userData = { userPost: [], userReel: [] };
+        if (!userData) {
+            userData = { userPost: [], userReel: [] };
+        }
 
         res.render('dashboard.ejs', { user, userData });
 
@@ -190,14 +144,21 @@ app.get('/dashboard', isAuth, async (req, res) => {
     }
 });
 
-// PROFILE
-app.get('/profile', isAuth, async (req, res) => {
+
+app.get('/profile', async (req, res) => {
     try {
+
+        if (!req.session.loginId) return res.redirect('/');
+
         const user = await instaSchema.findById(req.session.loginId);
 
-        let profile = await userSchema.findOne({ userId: req.session.loginId });
+        let profile = await userSchema.findOne({
+            userId: req.session.loginId
+        });
 
-        if (!profile) profile = { userPost: [], userReel: [] };
+        if (!profile) {
+            profile = { userPost: [], userReel: [] };
+        }
 
         res.render('profile.ejs', { user, profile });
 
@@ -206,12 +167,31 @@ app.get('/profile', isAuth, async (req, res) => {
     }
 });
 
-// UPDATE PROFILE
-app.post('/profile', isAuth, upload.single('userProfile'), async (req, res) => {
+
+app.get('/edit-profile', async (req, res) => {
+
+    if (!req.session.loginId) return res.redirect('/');
+
+    let profile = await userSchema.findOne({
+        userId: req.session.loginId
+    });
+
+    if (!profile) profile = {};
+
+    res.render('edit-profile.ejs', { profile });
+});
+
+
+app.post('/profile', upload.single('userProfile'), async (req, res) => {
     try {
+
+        if (!req.session.loginId) return res.redirect('/');
+
         const { username, userBio, gender } = req.body;
 
-        let existing = await userSchema.findOne({ userId: req.session.loginId });
+        let existing = await userSchema.findOne({
+            userId: req.session.loginId
+        });
 
         const userProfile = req.file
             ? req.file.filename
@@ -226,7 +206,7 @@ app.post('/profile', isAuth, upload.single('userProfile'), async (req, res) => {
                 gender,
                 userProfile
             },
-            { upsert: true }
+            { returnDocument: 'after', upsert: true }
         );
 
         res.send(`<script>alert('Profile Updated'); location.href='/profile'</script>`);
@@ -236,9 +216,18 @@ app.post('/profile', isAuth, upload.single('userProfile'), async (req, res) => {
     }
 });
 
-// CREATE POST
-app.post('/create-post', isAuth, upload.array('userPost'), async (req, res) => {
+
+app.get('/create', (req, res) => {
+    if (!req.session.loginId) return res.redirect('/');
+    res.render('create.ejs');
+});
+
+
+app.post('/create-post', upload.array('userPost'), async (req, res) => {
     try {
+
+        if (!req.session.loginId) return res.redirect('/');
+
         if (!req.files || req.files.length === 0) {
             return res.send("No post uploaded");
         }
@@ -251,6 +240,7 @@ app.post('/create-post', isAuth, upload.array('userPost'), async (req, res) => {
         await userSchema.updateOne(
             { userId: req.session.loginId },
             {
+                $set: { userId: req.session.loginId },
                 $push: { userPost: { $each: posts } }
             },
             { upsert: true }
@@ -263,27 +253,66 @@ app.post('/create-post', isAuth, upload.array('userPost'), async (req, res) => {
     }
 });
 
-// DELETE POST
-app.get('/delete/post/:id', isAuth, async (req, res) => {
+
+app.post('/create-reel', upload.array('userReel'), async (req, res) => {
     try {
+
+        if (!req.session.loginId) return res.redirect('/');
+
+        if (!req.files || req.files.length === 0) {
+            return res.send("No reel uploaded");
+        }
+
+        const reels = req.files.map(file => ({
+            video: file.filename,
+            caption: req.body.caption || ""
+        }));
+
+        await userSchema.updateOne(
+            { userId: req.session.loginId },
+            {
+                $set: { userId: req.session.loginId },
+                $push: { userReel: { $each: reels } }
+            },
+            { upsert: true }
+        );
+
+        res.redirect('/profile');
+
+    } catch (err) {
+        console.log(err);
+    }
+});
+
+
+app.get('/delete/post/:id', async (req, res) => {
+    try {
+
         const postId = req.params.id;
 
-        let userData = await userSchema.findOne({ userId: req.session.loginId });
+        let userData = await userSchema.findOne({
+            userId: req.session.loginId
+        });
 
         if (!userData) return res.redirect('/profile');
 
         const post = userData.userPost.find(p => p._id.toString() === postId);
 
         if (post) {
+
             const filename = post.image;
 
             await userSchema.updateOne(
                 { userId: req.session.loginId },
-                { $pull: { userPost: { _id: postId } } }
+                {
+                    $pull: { userPost: { _id: postId } }
+                }
             );
 
-            const filePath = path.join(__dirname, "public/upload/", filename);
-            if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+            const path = "public/upload/" + filename;
+            if (fs.existsSync(path)) {
+                fs.unlinkSync(path);
+            }
         }
 
         res.redirect('/profile');
@@ -293,13 +322,54 @@ app.get('/delete/post/:id', isAuth, async (req, res) => {
     }
 });
 
-// LOGOUT
+app.get('/delete/reel/:id', async (req, res) => {
+    try {
+
+        const reelId = req.params.id;
+
+        const userData = await userSchema.findOne({
+            userId: req.session.loginId
+        });
+
+        if (!userData) return res.redirect('/profile');
+
+        const reel = userData.userReel.find(
+            r => r._id.toString() === reelId
+        );
+
+        if (!reel) {
+            console.log("Reel not found");
+            return res.redirect('/profile');
+        }
+
+        const filename = reel.video;
+
+    
+        userData.userReel = userData.userReel.filter(
+            r => r._id.toString() !== reelId
+        );
+
+        await userData.save();
+
+        const path = "public/upload/" + filename;
+        if (fs.existsSync(path)) {
+            fs.unlinkSync(path);
+        }
+
+        res.redirect('/profile');
+
+    } catch (err) {
+        console.log(err);
+    }
+});
+
+
 app.get('/logout', (req, res) => {
     req.session.destroy();
     res.redirect('/');
 });
 
-// ------------------ SERVER ------------------
+
 app.listen(PORT, HOST, () => {
     console.log(`Server running on http://${HOST}:${PORT}`);
 });
